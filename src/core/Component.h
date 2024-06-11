@@ -12,4 +12,9 @@ namespace ComcoEditor
     Vector2 m_Scale;
   };
 
+  struct Sprite
+  {
+    Vector4 m_Color{0.0f, 0.0f, 0.0f, 1.0f};
+  };
+
 }

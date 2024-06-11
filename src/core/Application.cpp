@@ -55,10 +55,9 @@ namespace ComcoEditor {
       BeginDrawing();
       DrawFPS(0, 0);
 
-      ClearBackground(BLACK);
+      ClearBackground(RAYWHITE);
   
       // Draw shapes
-
       for(auto& shape: this->m_Shapes)
       {
         Renderer::DrawShape(*shape);
