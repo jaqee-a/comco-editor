@@ -1,10 +1,12 @@
 #include "Application.h"
+#include "core/Component.h"
 #include "core/Renderer.h"
-#include "core/Shape.h"
 #include "raylib.h"
 #include "rlImGui.h"
 #include "ui/ImGuiLayer.h"
+#include "utils/UUID.h"
 #include <cstdlib>
+#include "Entity.h"
 
 
 namespace ComcoEditor {
@@ -22,21 +24,11 @@ namespace ComcoEditor {
     s_Instance = nullptr;
   }
 
-  void Application::AppendShape()
+  ApplicationSpecification Application::GetApplicationSpecification()
   {
-    Shape *shape = new Shape();
-    shape->setTransform({
-      {(rand() / (float) RAND_MAX) * 500, (rand() / (float) RAND_MAX) * 500},
-      {0, 0},
-      {50, 50}
-    });
-    this->m_Shapes.push_back(shape);
+    return this->m_ApplicationSpecification;
   }
 
-  std::vector<Shape*> Application::GetShapes()
-  {
-    return this->m_Shapes;
-  }
 
   void Application::Init()
   {
@@ -57,10 +49,9 @@ namespace ComcoEditor {
 
       ClearBackground(RAYWHITE);
   
-      // Draw shapes
-      for(auto& shape: this->m_Shapes)
+      for(auto& [_, entity]: this->m_EntityMap)
       {
-        Renderer::DrawShape(*shape);
+        Renderer::DrawEntity(entity);
       }
 
       ImGuiLayer::DrawMenu();
@@ -73,15 +64,30 @@ namespace ComcoEditor {
   {
     m_IsRunning = false;
 
-    for(auto& shape: this->m_Shapes)
+    for(auto& [_, entity]: this->m_EntityMap)
     {
-      delete shape;
+      Renderer::DrawEntity(entity);
     }
 
-    this->m_Shapes.clear();
+    this->m_EntityMap.clear();
     
     rlImGuiShutdown();
     CloseWindow();
+  }
+
+
+  ComcoEditor::Entity Application::CreateEntity(const std::string& name)
+  {
+		ComcoEditor::Entity entity = { this->m_Registry.create(), this };
+    UUID uuid = UUID();
+		entity.AddComponent<IDComponent>(uuid);
+		entity.AddComponent<Transform>();
+		auto& tag = entity.AddComponent<Tag>();
+		tag.Tag = name.empty() ? "Entity" : name;
+
+		m_EntityMap[uuid] = entity;
+
+		return entity;
   }
 
 }

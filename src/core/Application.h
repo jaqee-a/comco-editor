@@ -1,9 +1,9 @@
 #pragma once
 
-#include "core/Shape.h"
+#include "utils/UUID.h"
 #include <cstdint>
 #include <string>
-#include <vector>
+#include <entt.hpp>
 
 namespace ComcoEditor
 {
@@ -15,6 +15,8 @@ namespace ComcoEditor
     uint32_t fps = 60;
   };
 
+  class Entity;
+
   class Application
   {
   public:
@@ -23,17 +25,19 @@ namespace ComcoEditor
 
     static Application& Get() { return *s_Instance; }
 
-    void AppendShape();
-    std::vector<Shape*> GetShapes();
+    ApplicationSpecification GetApplicationSpecification(); 
 
     void Init();
     void Run();
     void Close();
 
+    // TODO: Move
+    Entity CreateEntity(const std::string& name);
+    entt::registry m_Registry;
+		std::unordered_map<UUID, Entity> m_EntityMap;
   private:
     bool m_IsRunning = false;
     ApplicationSpecification m_ApplicationSpecification;
-    std::vector<Shape*> m_Shapes;
     static Application* s_Instance;
   };
 }

@@ -1,11 +1,11 @@
 #pragma once
 
-#include "core/Shape.h"
+#include "core/Entity.h"
 namespace ComcoEditor 
 {
 	class Renderer
 	{
 	public:
-    static void DrawShape(ComcoEditor::Shape shape);
+    static void DrawEntity(ComcoEditor::Entity shape);
 	};
 }

@@ -13,7 +13,7 @@ file(GLOB_RECURSE SRC vendor/*.cpp src/*.cpp src/*.c)
 set(PROJECT_INCLUDE "${CMAKE_CURRENT_LIST_DIR}/src/") # Define PROJECT_INCLUDE to be the path to the include directory of the project
 
 add_subdirectory(vendor/raylib)
-include_directories(include vendor/imgui vendor/rlimgui)
+include_directories(include vendor/imgui vendor/rlimgui vendor/entt)
 
 # Declaring our executable
 add_executable(${PROJECT_NAME} ${SRC})

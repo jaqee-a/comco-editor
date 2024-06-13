@@ -1,6 +1,6 @@
 #pragma once
 
-#include <cstdint>
+#include "utils/UUID.h"
 
 namespace ComcoEditor
 {
@@ -9,7 +9,7 @@ namespace ComcoEditor
   public:
     static void DrawMenu();
   private:
-    static int32_t SelectedShapeIndex;
+    static UUID SelectedEntityUUID;
   };
 }
 
