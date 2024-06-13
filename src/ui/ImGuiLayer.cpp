@@ -10,6 +10,7 @@
 #include "core/Application.h"
 #include "core/Component.h"
 #include "core/Entity.h"
+#include "raylib.h"
 
 namespace ComcoEditor
 {
@@ -27,6 +28,28 @@ namespace ComcoEditor
     ApplicationSpecification applicationSpecification = application.GetApplicationSpecification();
 
     ImGui::StyleColorsDark();
+  
+    // Cursor selector
+    for(auto [uuid, entity]: application.m_EntityMap)
+    {
+      if(!entity.HasComponent<Transform>()) continue;
+      Transform transform = entity.GetComponent<Transform>();
+      Vector2 position = transform.m_Position;
+      Vector2 scale = transform.m_Scale;
+      if(IsMouseButtonDown(MOUSE_BUTTON_LEFT))
+      {
+        int mouseX = GetMouseX();
+        int mouseY = GetMouseY();
+
+        if(mouseX >= position.x && mouseY >= position.y && mouseX <= position.x + scale.x && mouseY <= position.y + scale.y)
+        {
+          SelectedEntityUUID = uuid;
+          break;
+        }
+      }
+    }
+    
+
     // Left panel
     ImGui::Begin("Entitys List");
     // if (ImGui::BeginMenuBar())
