@@ -61,12 +61,20 @@ namespace ComcoEditor
     Image m_Image;
   };
 
+  struct Rigidbody
+  {
+  public:
+    void Update()
+    { }
+  private:
+    Vector2 m_Force{0.f, 0.f};
+    Vector2 m_Acceleration{0.f, 0.f};
+  };
 
 	template<typename... Component>
 	struct ComponentGroup
-	{
-	};
+	{ };
 
-	using AllComponents = ComponentGroup<IDComponent, Tag, Transform, Sprite>;
+	using AllComponents = ComponentGroup<IDComponent, Tag, Transform, Sprite, Rigidbody>;
 
 }
