@@ -1,6 +1,5 @@
 #pragma once
 
-#include "core/Component.h"
 #include "core/Application.h"
 #include <cassert>
 #include <entt.hpp>
@@ -12,13 +11,6 @@ namespace ComcoEditor
   class Entity
   {
   public:
-
-    ComcoEditor::Transform& getTransform();
-    ComcoEditor::Sprite& getSprite();
-
-    void setTransform(ComcoEditor::Transform);
-    void setSprite(ComcoEditor::Sprite);
-
     Entity() = default;
     Entity(entt::entity, ComcoEditor::Application*);
     Entity(const Entity&) = default;

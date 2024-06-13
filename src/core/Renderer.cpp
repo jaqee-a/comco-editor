@@ -17,16 +17,18 @@ namespace ComcoEditor {
     Rectangle sourceRec = { 0.0f, 0.0f, (float)sprite.m_Texture.width, (float)sprite.m_Texture.height };
     Rectangle destRec = { position.x, position.y, scale.x, scale.y};
 
+    if(sprite.m_Texture.id)
     DrawTexturePro(sprite.m_Texture, sourceRec, 
                 destRec, {0, 0}, 0,
                 Color(sprite.m_Color.x*255, 
                   sprite.m_Color.y*255, 
                   sprite.m_Color.z*255, 
                   sprite.m_Color.w*255));
-    // DrawRectangle(position.x, position.y, scale.x, scale.y, 
-    //               Color(sprite.m_Color.x*255, 
-    //                     sprite.m_Color.y*255, 
-    //                     sprite.m_Color.z*255, 
-    //                     sprite.m_Color.w*255));
+    else
+    DrawRectangle(position.x, position.y, scale.x, scale.y, 
+                  Color(sprite.m_Color.x*255, 
+                        sprite.m_Color.y*255, 
+                        sprite.m_Color.z*255, 
+                        sprite.m_Color.w*255));
   }
 }

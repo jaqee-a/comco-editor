@@ -93,6 +93,18 @@ namespace ComcoEditor
           ImGui::EndDragDropTarget();
         }
       }
+
+      if(selectedEntity->HasComponent<ComcoEditor::Rigidbody>() && ImGui::CollapsingHeader("Rigidbody"))
+      {
+        ComcoEditor::Rigidbody* rigidbody = &selectedEntity->GetComponent<ComcoEditor::Rigidbody>();
+        ImGui::DragFloat2("Velocity", (float*)(&rigidbody->m_Velocity));
+        ImGui::DragFloat2("Acceleration", (float*)(&rigidbody->m_Acceleration)); 
+        ImGui::DragFloat("Mass", &rigidbody->m_Mass); 
+        ImGui::Checkbox("Use Gravity", &rigidbody->m_UseGravity); 
+        ImGui::Checkbox("Use Drag", &rigidbody->m_UseDrag); 
+        ImGui::DragFloat("Drag", &rigidbody->m_Drag, 0.01f, 0.f, 1.f);
+      }
+
       // if (ImGui::Button("Select.."))
       //   ImGui::OpenPopup("my_select_popup");
 

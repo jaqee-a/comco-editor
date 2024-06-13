@@ -6,7 +6,6 @@
 #include "ui/ImGuiLayer.h"
 #include "utils/UUID.h"
 #include <cstdlib>
-#include "Entity.h"
 
 
 namespace ComcoEditor {
@@ -49,7 +48,25 @@ namespace ComcoEditor {
       DrawFPS(0, 0);
 
       ClearBackground(RAYWHITE);
+
+      // Update
+      auto view = m_Registry.view<Rigidbody>();
+
+      for (auto e : view)
+      {
+        Entity entity = { e, this };
+        auto& transform = entity.GetComponent<Transform>();
+        auto& rb = entity.GetComponent<Rigidbody>();
+
+        rb.Update(GetFrameTime());
+
+        auto& position = transform.m_Position;
+        position.x += rb.m_Velocity.x;
+        position.y += rb.m_Velocity.y;
+      }
+
   
+      // Render
       for(auto& [_, entity]: this->m_EntityMap)
       {
         Renderer::DrawEntity(entity);
@@ -83,6 +100,7 @@ namespace ComcoEditor {
     UUID uuid = UUID();
 		entity.AddComponent<IDComponent>(uuid);
 		entity.AddComponent<Transform>();
+		entity.AddComponent<Rigidbody>();
 		auto& tag = entity.AddComponent<Tag>();
 		tag.Tag = name.empty() ? "Entity" : name;
 

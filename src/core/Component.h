@@ -1,13 +1,14 @@
 #pragma once
 
 #include "raylib.h"
-#include "utils/UUID.h"
+#include <cmath>
 #include <cstdlib>
 #include <string>
 
+#include "utils/UUID.h"
+
 namespace ComcoEditor 
 {
-
   struct IDComponent
   {
     UUID ID;
@@ -64,11 +65,38 @@ namespace ComcoEditor
   struct Rigidbody
   {
   public:
-    void Update()
-    { }
-  private:
-    Vector2 m_Force{0.f, 0.f};
+    Vector2 m_Velocity{0.f, 0.f};
     Vector2 m_Acceleration{0.f, 0.f};
+    float_t m_Mass = 1.f;
+    bool m_UseGravity = false;
+    bool m_UseDrag = false;
+    float_t m_Drag = 1.f;
+
+    void Update(float deltaTime)
+    {
+      if(m_UseGravity)
+      {
+        ApplyForce({0, 9.1f * m_Mass});
+      }
+      m_Velocity.x += m_Acceleration.x * deltaTime;
+      m_Velocity.y += m_Acceleration.y * deltaTime;
+      m_Acceleration= {0.f, 0.f};
+
+      if(m_UseDrag)
+      {
+        m_Velocity.x *= m_Drag;
+        m_Velocity.y *= m_Drag;
+      }
+    }
+  private:
+    
+    void ApplyForce(const Vector2& force)
+    {
+        Vector2 newAcceleration = {force.x * (1.0f / m_Mass),
+                                   force.y * (1.0f / m_Mass)};
+        m_Acceleration.x += newAcceleration.x;
+        m_Acceleration.y += newAcceleration.y;
+    }
   };
 
 	template<typename... Component>
