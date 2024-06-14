@@ -1,5 +1,6 @@
 #pragma once
 
+#include "core/Application.h"
 #include "utils/UUID.h"
 
 namespace ComcoEditor
@@ -7,10 +8,19 @@ namespace ComcoEditor
   class ImGuiLayer
   {
   public:
-    static void Init();
-    static void DrawMenu();
+    ImGuiLayer(Application&); 
+    ImGuiLayer(const ImGuiLayer&) = default;
+    ~ImGuiLayer(); 
+
+    void Init();
+    void DrawMenu();
   private:
-    static UUID SelectedEntityUUID;
+    UUID m_SelectedEntityUUID = -1;
+    void MouseUpdate();
+    void DrawEntityListPanel();
+    void DrawEntityPropertiesPanel();
+    void DrawExplorerPanel();
+    Application& m_Application;
   };
 }
 

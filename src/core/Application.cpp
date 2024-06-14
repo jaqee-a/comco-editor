@@ -15,6 +15,7 @@ namespace ComcoEditor {
   Application::Application(const ApplicationSpecification& applicationSpecification): m_ApplicationSpecification(applicationSpecification)
   {
     s_Instance = this;
+    this->m_ImGuiLayer = new ImGuiLayer(*this);
     Init();
   }
 
@@ -40,7 +41,7 @@ namespace ComcoEditor {
 
   void Application::Run()
   {
-    ImGuiLayer::Init();
+    // this->m_ImGuiLayer->Init();
     m_IsRunning = true;
     while(!WindowShouldClose())
     {
@@ -72,7 +73,7 @@ namespace ComcoEditor {
         Renderer::DrawEntity(entity);
       }
 
-      ImGuiLayer::DrawMenu();
+      this->m_ImGuiLayer->DrawMenu();
 
       EndDrawing();
     }

@@ -3,6 +3,8 @@
 #include "raylib.h"
 #include <cmath>
 #include <cstdlib>
+#include <iostream>
+#include <ostream>
 #include <string>
 
 #include "utils/UUID.h"
@@ -76,6 +78,7 @@ namespace ComcoEditor
     {
       if(m_UseGravity)
       {
+        std::cout << m_Mass << std::endl;
         ApplyForce({0, 9.1f * m_Mass});
       }
       m_Velocity.x += m_Acceleration.x * deltaTime;
@@ -92,8 +95,8 @@ namespace ComcoEditor
     
     void ApplyForce(const Vector2& force)
     {
-        Vector2 newAcceleration = {force.x * (1.0f / m_Mass),
-                                   force.y * (1.0f / m_Mass)};
+        Vector2 newAcceleration = {force.x * (1.0f / m_Mass ? m_Mass: 0.0001f),
+                                   force.y * (1.0f / m_Mass ? m_Mass: 0.0001f)};
         m_Acceleration.x += newAcceleration.x;
         m_Acceleration.y += newAcceleration.y;
     }

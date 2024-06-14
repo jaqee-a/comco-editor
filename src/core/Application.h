@@ -16,11 +16,12 @@ namespace ComcoEditor
   };
 
   class Entity;
+  class ImGuiLayer;
 
   class Application
   {
   public:
-    Application(const ApplicationSpecification& applicationSpecification);
+    Application(const ApplicationSpecification&);
     ~Application();
 
     static Application& Get() { return *s_Instance; }
@@ -39,5 +40,7 @@ namespace ComcoEditor
     bool m_IsRunning = false;
     ApplicationSpecification m_ApplicationSpecification;
     static Application* s_Instance;
+
+    ImGuiLayer *m_ImGuiLayer;
   };
 }

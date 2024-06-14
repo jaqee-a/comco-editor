@@ -1,36 +1,22 @@
 #include "ImGuiLayer.h"
-
 #include <cmath>
 #include <cstddef>
 #include <filesystem>
 #include <imgui.h>
-#include <iostream>
 #include <rlImGui.h>
 #include <string>
 #include "core/Application.h"
 #include "core/Component.h"
 #include "core/Entity.h"
-#include "raylib.h"
 
 namespace ComcoEditor
 {
-  UUID ImGuiLayer::SelectedEntityUUID = -1;
+  ImGuiLayer::ImGuiLayer(Application& application): m_Application(application)
+  { }
 
-  void ImGuiLayer::Init()
+  void ImGuiLayer::MouseUpdate()
   {
-  }
-
-  void ImGuiLayer::DrawMenu()
-  {
-    rlImGuiBegin();
-
-    ComcoEditor::Application& application = ComcoEditor::Application::Get();
-    ApplicationSpecification applicationSpecification = application.GetApplicationSpecification();
-
-    ImGui::StyleColorsDark();
-  
-    // Cursor selector
-    for(auto [uuid, entity]: application.m_EntityMap)
+    for(auto [uuid, entity]: this->m_Application.m_EntityMap)
     {
       if(!entity.HasComponent<Transform>()) continue;
       Transform transform = entity.GetComponent<Transform>();
@@ -43,45 +29,46 @@ namespace ComcoEditor
 
         if(mouseX >= position.x && mouseY >= position.y && mouseX <= position.x + scale.x && mouseY <= position.y + scale.y)
         {
-          SelectedEntityUUID = uuid;
+          m_SelectedEntityUUID = uuid;
           break;
         }
       }
     }
-    
-
-    // Left panel
+  }
+  
+  void ImGuiLayer::DrawEntityListPanel()
+  {
     ImGui::Begin("Entitys List");
-    // if (ImGui::BeginMenuBar())
-    // {
-      if (ImGui::BeginMenu("Add"))
-      {
-        if(ImGui::MenuItem("New", NULL, false, true))
+      // if (ImGui::BeginMenuBar())
+      // {
+        if (ImGui::BeginMenu("Add"))
         {
-          application.CreateEntity("Hello Entity").AddComponent<ComcoEditor::Sprite>();
+          if(ImGui::MenuItem("New", NULL, false, true))
+          {
+            this->m_Application.CreateEntity("Hello Entity").AddComponent<ComcoEditor::Sprite>();
+          }
+          ImGui::EndMenu();
         }
-        ImGui::EndMenu();
-      }
-    // }
+      // }
 
-    for(auto& [uuid, entity]: application.m_EntityMap)
-    {
-      Tag tag = entity.GetComponent<Tag>();
-      std::string name = tag.Tag + " (" + std::to_string(uuid) + ")";
-      if(ImGui::Selectable(name.c_str(), SelectedEntityUUID == uuid))
+      for(auto& [uuid, entity]: this->m_Application.m_EntityMap)
       {
-        SelectedEntityUUID = uuid;
+        Tag tag = entity.GetComponent<Tag>();
+        std::string name = tag.Tag + " (" + std::to_string(uuid) + ")";
+        if(ImGui::Selectable(name.c_str(), m_SelectedEntityUUID == uuid))
+        {
+          m_SelectedEntityUUID = uuid;
+        }
       }
-    }
-    ImGui::End();
+      ImGui::End();
+  }
 
-    ImGui::ShowDemoWindow();
-
-    // Right panels
+  void ImGuiLayer::DrawEntityPropertiesPanel()
+  {
     ImGui::Begin("Entity Information");
-    if (SelectedEntityUUID != -1) 
+    if (m_SelectedEntityUUID != -1) 
     {
-      ComcoEditor::Entity* selectedEntity = &application.m_EntityMap[SelectedEntityUUID];
+      ComcoEditor::Entity* selectedEntity = &this->m_Application.m_EntityMap[m_SelectedEntityUUID];
 
       ComcoEditor::Tag tag = selectedEntity->GetComponent<ComcoEditor::Tag>();
       ImGui::Text("%s", tag.Tag.c_str());
@@ -148,7 +135,10 @@ namespace ComcoEditor
         ImGui::Text("No entity selected");
     }
     ImGui::End();
+  }
 
+  void ImGuiLayer::DrawExplorerPanel()
+  {
     ImGui::Begin("Explore");
     for (const auto& entry : std::filesystem::directory_iterator("./assets")) 
     {
@@ -162,12 +152,19 @@ namespace ComcoEditor
       }
     }
     ImGui::End();
-
-
-    rlImGuiEnd();
-
   }
 
 
 
+  void ImGuiLayer::DrawMenu()
+  {
+    rlImGuiBegin();
+    ImGui::StyleColorsDark();
+    this->MouseUpdate();
+    this->DrawEntityListPanel();
+    this->DrawEntityPropertiesPanel();
+    this->DrawExplorerPanel();
+    ImGui::ShowDemoWindow();
+    rlImGuiEnd();
+  }
 }
