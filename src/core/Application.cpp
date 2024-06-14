@@ -41,7 +41,7 @@ namespace ComcoEditor {
 
   void Application::Run()
   {
-    // this->m_ImGuiLayer->Init();
+    this->m_ImGuiLayer->Init();
     m_IsRunning = true;
     while(!WindowShouldClose())
     {

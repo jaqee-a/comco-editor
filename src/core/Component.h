@@ -78,7 +78,6 @@ namespace ComcoEditor
     {
       if(m_UseGravity)
       {
-        std::cout << m_Mass << std::endl;
         ApplyForce({0, 9.1f * m_Mass});
       }
       m_Velocity.x += m_Acceleration.x * deltaTime;
