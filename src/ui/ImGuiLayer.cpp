@@ -1,19 +1,43 @@
 #include "ImGuiLayer.h"
 #include <cmath>
-#include <cstddef>
-#include <filesystem>
+#include <cstdlib>
 #include <imgui.h>
 #include <rlImGui.h>
-#include <string>
+#include <utility>
 #include "core/Application.h"
 #include "core/Component.h"
 #include "core/Entity.h"
+#include "raylib.h"
+#include "ui/Panel.h"
+#include "ui/Panels/EntityInspector.h"
+#include "ui/Panels/EntityList.h"
+#include "ui/Panels/FileExplorer.h"
 
 namespace ComcoEditor
 {
   ImGuiLayer::ImGuiLayer(Application& application): m_Application(application)
-  { }
+  {
+    this->CreatePanel<EntityList>(*this);
+    this->CreatePanel<EntityInspector>(*this);
+    this->CreatePanel<FileExplorer>(*this);
+  }
 
+  ImGuiLayer::~ImGuiLayer()
+  {
+    for(const auto& panel: this->m_Panels)
+    {
+      delete panel;
+    }
+  
+    this->m_Panels.clear();
+  }
+
+  template<typename T, typename... Args>
+  void ImGuiLayer::CreatePanel(Args&&... args)
+  {
+    ComcoEditor::Panel *panel = new T(std::forward<Args>(args)...);
+    this->m_Panels.push_back(panel);
+  }
 
   void ImGuiLayer::Init()
   {
@@ -64,134 +88,81 @@ namespace ComcoEditor
       }
     }
   }
-  
-  void ImGuiLayer::DrawEntityListPanel()
-  {
-    ImGui::Begin("Entitys List");
-      // if (ImGui::BeginMenuBar())
-      // {
-        if (ImGui::BeginMenu("Add"))
-        {
-          if(ImGui::MenuItem("New", NULL, false, true))
-          {
-            this->m_Application.CreateEntity("Hello Entity").AddComponent<ComcoEditor::Sprite>();
-          }
-          ImGui::EndMenu();
-        }
-      // }
 
-      for(auto& [uuid, entity]: this->m_Application.m_EntityMap)
-      {
-        Tag tag = entity.GetComponent<Tag>();
-        std::string name = tag.Tag + " (" + std::to_string(uuid) + ")";
-        if(ImGui::Selectable(name.c_str(), m_SelectedEntityUUID == uuid))
-        {
-          m_SelectedEntityUUID = uuid;
-        }
-      }
-      ImGui::End();
-  }
-
-  void ImGuiLayer::DrawEntityPropertiesPanel()
+  void ImGuiLayer::DrawAnimationMenu()
   {
-    ImGui::Begin("Entity Information");
-    if (m_SelectedEntityUUID != -1) 
+    ImGui::Begin("Animations");
+
+    int lines = 5;
+    for (int line = 0; line < lines; line++)
     {
-      ComcoEditor::Entity* selectedEntity = &this->m_Application.m_EntityMap[m_SelectedEntityUUID];
-
-      ComcoEditor::Tag tag = selectedEntity->GetComponent<ComcoEditor::Tag>();
-      ImGui::Text("%s", tag.Tag.c_str());
-      
-      if(selectedEntity->HasComponent<ComcoEditor::Transform>() && ImGui::CollapsingHeader("Transform"))
-      {
-        ComcoEditor::Transform* transform = &selectedEntity->GetComponent<ComcoEditor::Transform>();
-
-        ImGui::DragFloat2("Position", (float*)(&transform->m_Position));
-        ImGui::DragFloat2("Size", (float*)(&transform->m_Scale));
-      }
-
-      if(selectedEntity->HasComponent<ComcoEditor::Sprite>() && ImGui::CollapsingHeader("Sprite"))
-      {
-        ComcoEditor::Sprite* sprite = &selectedEntity->GetComponent<ComcoEditor::Sprite>();
-
-        ImGui::ColorEdit4("Color", (float*)(&sprite->m_Color));
-
-        if(rlImGuiImageButtonSize("Load new image", &sprite->m_Texture, {50, 50}))
+        // Display random stuff. For the sake of this trivial demo we are using basic Button() + SameLine()
+        // If you want to create your own time line for a real application you may be better off manipulating
+        // the cursor position yourself, aka using SetCursorPos/SetCursorScreenPos to position the widgets
+        // yourself. You may also want to use the lower-level ImDrawList API.
+        int num_buttons = 10 + ((line & 1) ? line * 9 : line * 3);
+        for (int n = 0; n < num_buttons; n++)
         {
-          sprite->Unload();
+            if (n > 0) ImGui::SameLine();
+            ImGui::PushID(n + line * 1000);
+            char num_buf[16];
+            sprintf(num_buf, "%d", n);
+            const char* label = (!(n % 15)) ? "FizzBuzz" : (!(n % 3)) ? "Fizz" : (!(n % 5)) ? "Buzz" : num_buf;
+            float hue = n * 0.05f;
+            ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue, 0.6f, 0.6f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(hue, 0.7f, 0.7f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(hue, 0.8f, 0.8f));
+            ImGui::Button(label, ImVec2(40.0f + sinf((float)(line + n)) * 20.0f, 0.0f));
+            ImGui::PopStyleColor(3);
+            ImGui::PopID();
         }
-
-        if (ImGui::BeginDragDropTarget())
-        {
-          if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("DND_FILENAME"))
-          {
-            const char* filename = (const char*)payload->Data;
-            sprite->Unload();
-            sprite->Load(filename);
-          }
-          ImGui::EndDragDropTarget();
-        }
-      }
-
-      if(selectedEntity->HasComponent<ComcoEditor::Rigidbody>() && ImGui::CollapsingHeader("Rigidbody"))
-      {
-        ComcoEditor::Rigidbody* rigidbody = &selectedEntity->GetComponent<ComcoEditor::Rigidbody>();
-        ImGui::DragFloat2("Velocity", (float*)(&rigidbody->m_Velocity));
-        ImGui::DragFloat2("Acceleration", (float*)(&rigidbody->m_Acceleration)); 
-        ImGui::DragFloat("Mass", &rigidbody->m_Mass); 
-        ImGui::Checkbox("Use Gravity", &rigidbody->m_UseGravity); 
-        ImGui::Checkbox("Use Drag", &rigidbody->m_UseDrag); 
-        ImGui::DragFloat("Drag", &rigidbody->m_Drag, 0.01f, 0.f, 1.f);
-      }
-
-      // if (ImGui::Button("Select.."))
-      //   ImGui::OpenPopup("my_select_popup");
-
-      // ImGui::SameLine();
-      // if (ImGui::BeginPopup("my_select_popup"))
-      // {
-      //   ImGui::SeparatorText("Components");
-      //   for (int i = 0; i < 10; i++)
-      //   {
-      //     if(ImGui::Selectable(std::to_string(i).c_str()))
-      //     {
-      //     }
-      //   }
-      //   ImGui::EndPopup();
-      // }
-      
-    } else {
-        ImGui::Text("No entity selected");
     }
+
+    ImGui::End();
+
+    ImGui::Begin("Timeline");
+
+    // Calculate the size of the timeline
+    ImVec2 timelineSize = ImGui::GetContentRegionAvail();
+    ImVec2 cursorPos = ImGui::GetCursorScreenPos();
+    
+    // Draw the timeline background
+    ImGui::GetWindowDrawList()->AddRectFilled(cursorPos, ImVec2(cursorPos.x + timelineSize.x, cursorPos.y + 50), IM_COL32(60, 60, 60, 255));
+    
+    // Draw the current time indicator
+    // float indicatorPos = (rand() / RAND_MAX) * 10;
+    ImGui::GetWindowDrawList()->AddLine(ImVec2(GetMouseX(), cursorPos.y), ImVec2(GetMouseX(), cursorPos.y + 50), IM_COL32(255, 0, 0, 255), 2.0f);
+    
+    // Here you would add code to handle keyframes and other interactive elements
+    // ...
+
     ImGui::End();
   }
 
-  void ImGuiLayer::DrawExplorerPanel()
+  template<class T>
+  T* ImGuiLayer::GetPanel()
   {
-    ImGui::Begin("Explore");
-    for (const auto& entry : std::filesystem::directory_iterator("./assets")) 
+    for (const auto& panel: this->m_Panels)
     {
-      std::string filename = entry.path().string();
-      ImGui::Selectable(filename.c_str());
-      if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
+      auto* derived = dynamic_cast<T*>(panel);
+      if(derived != nullptr)
       {
-        ImGui::SetDragDropPayload("DND_FILENAME", filename.c_str(), sizeof(filename));
-        ImGui::Text("%s", filename.c_str());
-        ImGui::EndDragDropSource();
+        return derived;
       }
     }
-    ImGui::End();
+    return nullptr;
   }
-
-
 
   void ImGuiLayer::DrawMenu()
   {
     rlImGuiBegin();
+    
+    for (const auto& panel: this->m_Panels)
+    {
+      panel->OnRender(this->m_Application);
+    }
+
     this->MouseUpdate();
-    this->DrawEntityListPanel();
-    this->DrawEntityPropertiesPanel();
-    this->DrawExplorerPanel();
     ImGui::ShowDemoWindow();
     rlImGuiEnd();
   }

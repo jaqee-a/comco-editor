@@ -1,7 +1,7 @@
 set -xe
 
 watch() {
-    ls ./CMakeLists.txt | entr -sc "./build.sh clean build"
+  find ./src | entr -sc "./build.sh build run"
 }
 
 build() {

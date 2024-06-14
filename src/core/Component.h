@@ -3,8 +3,6 @@
 #include "raylib.h"
 #include <cmath>
 #include <cstdlib>
-#include <iostream>
-#include <ostream>
 #include <string>
 
 #include "utils/UUID.h"
