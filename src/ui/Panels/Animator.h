@@ -18,7 +18,7 @@ namespace ComcoEditor
     float m_CurrentTime = 0;
     bool m_IsPlaying = false;
 
-    std::vector<AnimationNode*> m_AnimationNodes;
-    std::pair<AnimationNode*, AnimationNode*> GetNextAnimationNode(UUID entityUUID);
+    std::vector<AnimationNode> m_AnimationNodes;
+    std::pair<AnimationNode, AnimationNode> GetNextAnimationNode(UUID entityUUID, bool& hasPrev, bool& hasNext);
   };
 }
