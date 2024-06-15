@@ -1,6 +1,5 @@
 #pragma once
 
-#include "core/AnimationNode.h"
 #include <cstddef>
 #include <cstdlib>
 #include <fstream>

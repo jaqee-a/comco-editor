@@ -49,7 +49,7 @@ namespace ComcoEditor
 
 
       // Play animation
-      if(!m_IsPlaying) continue;
+      if(!m_IsPlaying || m_Record) continue;
       ComcoEditor::Entity* selectedEntity = &application.m_EntityMap[node.m_EntityUUID];
       bool hasNext = false, hasPrev = false;
       auto nodes = this->GetNextAnimationNode(node.m_EntityUUID, hasPrev, hasNext);
@@ -77,16 +77,18 @@ namespace ComcoEditor
     float indicatorPos = (this->m_CurrentTime / 10) * timelineSize.x;
     ImGui::GetWindowDrawList()->AddLine(ImVec2(cursorPos.x + indicatorPos, cursorPos.y + 50), ImVec2(cursorPos.x + indicatorPos, cursorPos.y + 100), IM_COL32(255, 0, 0, 255), 2.0f);
 
-    ImGui::SameLine();
-    ImGui::BeginDisabled(this->m_ImGuiLayer.m_SelectedEntityUUID == -1);
-    ImGui::Button("New");
-    ImGui::EndDisabled();
+    // ImGui::SameLine();
+    // ImGui::BeginDisabled(this->m_ImGuiLayer.m_SelectedEntityUUID == -1);
+    // ImGui::Button("New");
+    // ImGui::EndDisabled();
     ImGui::SameLine();
     if(ImGui::Button("Pause")) this->m_IsPlaying = false;
     ImGui::SameLine();
     if(ImGui::Button("Play")) this->m_IsPlaying = true;
     ImGui::SameLine();
     if(ImGui::Button("Reset")) this->m_CurrentTime = 0;
+    ImGui::SameLine();
+    if(ImGui::Button("Clear")) this->m_AnimationNodes.clear();
     ImGui::SameLine();
     if(ImGui::Button("Save")) {
       ComcoEditor::SaveToBinaryFile<AnimationNode>(this->m_AnimationNodes.data(), sizeof(AnimationNode), this->m_AnimationNodes.size(), "Animation.anim");
@@ -106,13 +108,20 @@ namespace ComcoEditor
       }
     }
     ImGui::SameLine();
-    if(ImGui::Button("Snapshot"))
+    if(ImGui::Button("Snapshot") || m_Record)
     {
       ComcoEditor::Entity* selectedEntity = &application.m_EntityMap[this->m_ImGuiLayer.m_SelectedEntityUUID];
 
       ComcoEditor::Transform transform = selectedEntity->GetComponent<ComcoEditor::Transform>();
       this->m_AnimationNodes.push_back({selectedEntity->GetComponent<IDComponent>().ID, this->m_CurrentTime, {transform.m_Position}});
     }
+
+    ImGui::SameLine();
+    if(ImGui::Button("Record")) {
+      this->m_IsPlaying = !this->m_IsPlaying;
+      this->m_Record = !this->m_Record;
+    }
+
     ImGui::EndDisabled();
     this->m_CurrentTime += GetFrameTime() * this->m_IsPlaying;
         if(this->m_IsPlaying) std::cout <<"TIME " << this->m_CurrentTime << std::endl;
