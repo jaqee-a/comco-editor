@@ -9,6 +9,7 @@
 #include "core/Entity.h"
 #include "raylib.h"
 #include "ui/Panel.h"
+#include "ui/Panels/Animator.h"
 #include "ui/Panels/EntityInspector.h"
 #include "ui/Panels/EntityList.h"
 #include "ui/Panels/FileExplorer.h"
@@ -20,6 +21,7 @@ namespace ComcoEditor
     this->CreatePanel<EntityList>(*this);
     this->CreatePanel<EntityInspector>(*this);
     this->CreatePanel<FileExplorer>(*this);
+    this->CreatePanel<Animator>(*this);
   }
 
   ImGuiLayer::~ImGuiLayer()
@@ -116,26 +118,12 @@ namespace ComcoEditor
             ImGui::PopStyleColor(3);
             ImGui::PopID();
         }
+
     }
 
     ImGui::End();
 
     ImGui::Begin("Timeline");
-
-    // Calculate the size of the timeline
-    ImVec2 timelineSize = ImGui::GetContentRegionAvail();
-    ImVec2 cursorPos = ImGui::GetCursorScreenPos();
-    
-    // Draw the timeline background
-    ImGui::GetWindowDrawList()->AddRectFilled(cursorPos, ImVec2(cursorPos.x + timelineSize.x, cursorPos.y + 50), IM_COL32(60, 60, 60, 255));
-    
-    // Draw the current time indicator
-    // float indicatorPos = (rand() / RAND_MAX) * 10;
-    ImGui::GetWindowDrawList()->AddLine(ImVec2(GetMouseX(), cursorPos.y), ImVec2(GetMouseX(), cursorPos.y + 50), IM_COL32(255, 0, 0, 255), 2.0f);
-    
-    // Here you would add code to handle keyframes and other interactive elements
-    // ...
-
     ImGui::End();
   }
 
@@ -162,6 +150,7 @@ namespace ComcoEditor
       panel->OnRender(this->m_Application);
     }
 
+    // this->DrawAnimationMenu();
     this->MouseUpdate();
     ImGui::ShowDemoWindow();
     rlImGuiEnd();

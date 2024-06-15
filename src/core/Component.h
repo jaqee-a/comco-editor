@@ -22,7 +22,7 @@ namespace ComcoEditor
   struct Transform
   {
     Vector2 m_Position{0.f, 0.f};
-    Vector2 m_Rotation;
+    Vector2 m_Rotation{0.f, 0.f};
     Vector2 m_Scale{50.f, 50.f};
   };
 
